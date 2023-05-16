@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "asr"
+version = "0.1.0"
+description = ""
+authors = ["Tien-Cheng <tiencheng@protonmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyaudio = "^0.2.13"
+soundfile = "^0.12.1"
+numpy = "^1.24.3"
+
+
+[tool.poetry2conda]
+name = "brainhack-asr"
+
+[tool.poetry.group.dev.dependencies]
+poetry2conda = "^0.3.0"
+ipykernel = "^6.23.1"
+jupyterlab = "^4.0.0"
+black = "^23.3.0"
+isort = "^5.12.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
