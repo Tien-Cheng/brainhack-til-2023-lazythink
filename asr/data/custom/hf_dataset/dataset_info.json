@@ -1,0 +1,16 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "audio": {
+      "sampling_rate": 16000,
+      "_type": "Audio"
+    },
+    "transcript": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}
