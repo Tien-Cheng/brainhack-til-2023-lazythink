@@ -6,13 +6,18 @@ draft_file = 'temp.csv'
 audio_dir = 'audio'
 transcript_dir = 'transcripts'
 audio_folders = [folder for folder in os.listdir(audio_dir)]
-path_list, annotation_list = [], []
+path_list, annotation_list, transcript_list = [], [], []
+
+# Get all transcripts
+for transcript in os.listdir(transcript_dir):
+    with open(f'{transcript_dir}/{transcript}', 'r') as f:
+        transcript_list.append(f.read().rstrip())
 
 # Iterate through all files in the audio folder and create the temporary set
 for folder in audio_folders:
     audio_files = [f'audio/{folder}_{file}' for file in os.listdir(f'{audio_dir}/{folder}')]
     path_list.append(audio_files)
-    transcript_files = [transcript for transcript in os.listdir(transcript_dir)][:len(audio_files)]
+    transcript_files = transcript_list[:len(audio_files)]
     annotation_list.append(transcript_files)
 
 # Flatten lists
