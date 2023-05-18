@@ -6,8 +6,7 @@ mim install mmengine
 mim install "mmcv>=2.0.0"
 
 # Install mmdet
-# git clone https://github.com/open-mmlab/mmdetection.git
-# cd mmdetection
-# pip install -v -e .
-# cd ..
-mim install mmdet
+git clone https://github.com/open-mmlab/mmdetection.git
+cd mmdetection
+pip install -v -e .
+cd ..
