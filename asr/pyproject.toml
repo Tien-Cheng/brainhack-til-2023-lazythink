@@ -10,6 +10,14 @@ python = "^3.8"
 pyaudio = "^0.2.13"
 soundfile = "^0.12.1"
 numpy = "^1.24.3"
+torch = "^2.0.1"
+torchvision = "^0.15.2"
+torchaudio = "^2.0.2"
+transformers = "^4.29.2"
+datasets = "^2.12.0"
+evaluate = "^0.4.0"
+librosa = "^0.10.0.post2"
+jiwer = "^3.0.1"
 
 
 [tool.poetry2conda]
