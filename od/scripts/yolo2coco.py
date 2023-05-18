@@ -122,10 +122,10 @@ def cvt_yolo_to_coco_json(img_infos, annotation_infos, classes):
             n_w = float(annotation["n_w"])
             n_h = float(annotation["n_h"])
 
-            x = int((n_x - n_w / 2) * img_width)
-            y = int((n_y - n_h / 2) * img_height)
-            w = int(n_w * img_width)
-            h = int(n_h * img_height)
+            x = float((n_x - n_w / 2) * img_width)
+            y = float((n_y - n_h / 2) * img_height)
+            w = float(n_w * img_width)
+            h = float(n_h * img_height)
 
             annotation_item = dict(
                 id=annotation_id,
