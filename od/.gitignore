@@ -1,0 +1,2 @@
+# Ignore entire mmdet folder because managing submodule is a pain
+mmdetection
