@@ -72,6 +72,11 @@ def collect_yolo_annotations(
         with open(Path(path)/annotation_path, "r") as f:
             for line in f.readlines():
                 infos = line.strip().split()
+                if len(infos) != 5:
+                    warnings.warn(
+                        f"Invalid annotation format in {annotation_path}"
+                    )
+                    continue
                 annotations.append(
                     {
                         "classes": int(infos[0]),
