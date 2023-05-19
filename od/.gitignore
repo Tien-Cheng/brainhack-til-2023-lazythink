@@ -3,3 +3,6 @@ mmdetection
 
 # Ignore images
 data/images
+
+# Ignore work_dirs
+work_dirs
