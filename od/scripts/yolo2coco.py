@@ -79,7 +79,8 @@ def collect_yolo_annotations(
                     continue
                 annotations.append(
                     {
-                        "classes": int(infos[0]),
+                        # "classes": int(infos[0]),
+                        "classes": 0,  # Treat all class as plushie
                         "n_x": float(infos[1]),
                         "n_y": float(infos[2]),
                         "n_w": float(infos[3]),
