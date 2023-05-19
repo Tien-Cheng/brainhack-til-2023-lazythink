@@ -255,7 +255,7 @@ train_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/labels-train.json",
+        ann_file="labels-train.json",
         data_prefix=dict(img="images"),
         pipeline=train_pipeline,
     ),
@@ -272,7 +272,7 @@ val_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/labels-val.json",
+        ann_file="labels-val.json",
         data_prefix=dict(img="images/"),
         pipeline=test_pipeline,
     ),
@@ -289,7 +289,7 @@ test_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/test.json",
+        ann_file="test.json",
         data_prefix=dict(img="images"),
         pipeline=test_pipeline,
     ),
