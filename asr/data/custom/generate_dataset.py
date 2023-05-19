@@ -15,7 +15,7 @@ for transcript in os.listdir(transcript_dir):
 
 # Iterate through all files in the audio folder and create the temporary set
 for folder in audio_folders:
-    audio_files = [f'audio/{folder}_{file}' for file in os.listdir(f'{audio_dir}/{folder}')]
+    audio_files = [f'audio/{folder}/{file}' for file in os.listdir(f'{audio_dir}/{folder}')]
     path_list.append(audio_files)
     transcript_files = transcript_list[:len(audio_files)]
     annotation_list.append(transcript_files)
