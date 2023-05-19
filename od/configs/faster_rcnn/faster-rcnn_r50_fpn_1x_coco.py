@@ -6,7 +6,7 @@ _base_ = [
 ]
 
 # We also need to change the num_classes in head to match the dataset's
-model = dict(roi_head=dict(bbox_head=dict(num_classes=200)))
+model = dict(roi_head=dict(bbox_head=dict(num_classes=1)))
 
 # We can use the pre-trained Faster-RCNN model to obtain higher performance
 load_from = (
