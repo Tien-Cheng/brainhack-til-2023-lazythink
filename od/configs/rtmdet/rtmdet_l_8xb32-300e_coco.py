@@ -128,15 +128,15 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=32,
-    num_workers=10,
+    batch_size=16,
+    num_workers=4,
     batch_sampler=None,
     pin_memory=True,
     dataset=dict(pipeline=train_pipeline),
 )
 
 val_dataloader = dict(
-    batch_size=5, num_workers=10, dataset=dict(pipeline=test_pipeline)
+    batch_size=5, num_workers=2, dataset=dict(pipeline=test_pipeline)
 )
 test_dataloader = val_dataloader
 
