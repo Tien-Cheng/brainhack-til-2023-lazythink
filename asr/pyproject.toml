@@ -19,6 +19,10 @@ evaluate = "^0.4.0"
 librosa = "^0.10.0.post2"
 jiwer = "^3.0.1"
 pandas = "^2.0.1"
+peft = "^0.3.0"
+bitsandbytes = "^0.38.1"
+loralib = "^0.1.1"
+wandb = "^0.15.3"
 
 
 [tool.poetry2conda]
