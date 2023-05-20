@@ -1,7 +1,7 @@
 # dataset settings
 dataset_type = "CocoDataset"
 data_root = "data/"
-classes = ("plushie")
+classes = "plushie"
 
 
 # Example to use different file client
@@ -19,11 +19,18 @@ classes = ("plushie")
 #      }))
 backend_args = None
 
+# Import custom noise pipeline
+custom_imports = dict(
+    imports=["configs.custom_transform"],
+    allow_failed_imports=False,
+)
+
 train_pipeline = [
     dict(type="LoadImageFromFile", backend_args=backend_args),
     dict(type="LoadAnnotations", with_bbox=True),
     dict(type="Resize", scale=(1280, 720), keep_ratio=True),
     dict(type="RandomFlip", prob=0.5),
+    dict(type="RandomGaussian", prob=0.2),
     dict(type="PackDetInputs"),
 ]
 
@@ -107,5 +114,5 @@ test_evaluator = dict(
     ann_file=data_root + "/labels-test.json",
     metric="bbox",
     format_only=True,
-    outfile_prefix="./work_dirs/coco_detection/test"
+    outfile_prefix="./work_dirs/coco_detection/test",
 )
