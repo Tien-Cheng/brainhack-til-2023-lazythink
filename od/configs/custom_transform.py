@@ -19,13 +19,14 @@ class RandomGaussian(BaseTransform):
 
     Args:
         p (float): Probability of shifts. Default 0.5.
+        mean (float): Mean of gaussian noise. Default 128.
+        sigma (float): Sigma of gaussian noise. Default 20.
     """
 
-    def __init__(self, prob=0.5, mean=0, var=0.1):
+    def __init__(self, prob=0.5, mean=128, sigma=20):
         self.prob = prob
         self.mean = mean
-        self.var = var
-        self.sigma = self.var**0.5
+        self.sigma = sigma
 
     def transform(self, results: dict) -> dict:
         if random.random() > self.prob:
@@ -35,5 +36,5 @@ class RandomGaussian(BaseTransform):
     def _add_gaussian_noise(self, img: np.ndarray) -> np.ndarray:
         row, col, ch = img.shape
         gauss_noise = np.random.normal(self.mean, self.sigma, (row, col, ch))
-        noisy_img = img + gauss_noise
+        noisy_img = img + gauss_noise * 0.5
         return noisy_img
