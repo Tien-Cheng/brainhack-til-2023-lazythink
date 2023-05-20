@@ -78,7 +78,7 @@ val_dataloader = dict(
 )
 
 test_dataloader = dict(
-    batch_size=16,
+    batch_size=2,
     num_workers=2,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=True),
@@ -88,8 +88,8 @@ test_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="test.json",
-        data_prefix=dict(img="images/validation"),
+        ann_file="labels-test.json",
+        data_prefix=dict(img="images/test"),
         pipeline=test_pipeline,
     ),
 )
@@ -102,4 +102,10 @@ val_evaluator = dict(
     backend_args=backend_args,
 )
 
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type="CocoMetric",
+    ann_file=data_root + "/labels-test.json",
+    metric="bbox",
+    format_only=True,
+    outfile_prefix="./work_dirs/coco_detection/test"
+)
