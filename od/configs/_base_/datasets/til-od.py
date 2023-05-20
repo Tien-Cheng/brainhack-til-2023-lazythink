@@ -30,7 +30,7 @@ train_pipeline = [
     dict(type="LoadAnnotations", with_bbox=True),
     dict(type="Resize", scale=(1280, 720), keep_ratio=True),
     dict(type="RandomFlip", prob=0.5),
-    dict(type="RandomGaussian", prob=0.2),
+    dict(type="RandomGaussian", prob=0.5),
     dict(type="PackDetInputs"),
 ]
 
