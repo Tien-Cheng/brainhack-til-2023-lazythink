@@ -9,3 +9,6 @@ work_dirs
 
 # Ignore DetVisGUI
 DetVisGUI
+
+# Cropped image dir
+output
