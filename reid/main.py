@@ -1,5 +1,4 @@
 import argparse
-import glob
 from pathlib import Path
 
 import pandas as pd
@@ -28,6 +27,11 @@ def parse_args():
         type=str,
     )
     parser.add_argument(
+        "input_csv",
+        help="The input csv file that contains key of Image_Name",
+        type=str,
+    )
+    parser.add_argument(
         "output_csv",
         help="The output csv file",
         type=str,
@@ -53,8 +57,7 @@ def load_model(config: dict):
     return model, preprocess
 
 
-def encode_image(model, preprocess, img_dir: str):
-    img_paths = sorted(glob.glob(img_dir))
+def encode_image(model, preprocess, img_paths: list[str]):
     print("num image found:", len(img_paths))
     with torch.inference_mode(), torch.cuda.amp.autocast():
         preprocesed_img = torch.stack(
@@ -70,10 +73,15 @@ def main():
     args = parse_args()
     assert Path(args.suspect_dir).is_dir()
     assert Path(args.cropped_dir).is_dir()
+    assert Path(args.input_csv).is_file()
 
     suspect_dir = Path(args.suspect_dir)
     cropped_dir = Path(args.cropped_dir)
     output_csv = Path(args.output_csv)
+
+    # load csv
+    df = pd.read_csv(args.input_csv)
+    df["Image_Path"] = df["Image_Name"].apply(lambda x: str(cropped_dir / x))
 
     # load model
     model, preprocess = load_model(
@@ -87,12 +95,12 @@ def main():
 
     # encode suspect images
     suspect_vectors = encode_image(
-        model, preprocess, str(suspect_dir / "*.png")
+        model, preprocess, list(suspect_dir.glob("*.png"))
     )
 
     # encode cropped images
     cropped_vectors = encode_image(
-        model, preprocess, str(cropped_dir / "*.png")
+        model, preprocess, df["Image_Path"].values.tolist()
     )
 
     # compute cosine similarity
@@ -103,15 +111,11 @@ def main():
     max_similarity = torch.max(similarity_matrix, dim=1)
 
     # check if similarity is greater than threshold
-    is_suspect = torch.where(max_similarity > args.similarity_threshold)
+    is_suspect = torch.where(max_similarity > args.similarity_threshold, 1, 0)
 
     # save to csv
-    pd.DataFrame(
-        dict(
-            suspect_file_name=list(suspect_dir.glob("*.png")),
-            is_suspect=is_suspect.tolist(),
-        )
-    ).to_csv(output_csv, index=False)
+    df["class"] = is_suspect.tolist()
+    df.to_csv(output_csv, index=False)
 
 
 if __name__ == "__main__":
