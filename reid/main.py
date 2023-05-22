@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 import open_clip
+import tqdm
 from PIL import Image
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,6 +55,7 @@ def load_model(config: dict):
     print("loading model")
     model, preprocess = open_clip.create_model_from_pretrained(**config)
     model.eval()
+    print("model loaded")
     return model, preprocess
 
 
@@ -62,8 +64,12 @@ def encode_image(model, preprocess, img_paths: list[str]):
     with torch.inference_mode(), torch.cuda.amp.autocast():
         preprocesed_img = torch.stack(
             [preprocess(load_image(x)) for x in img_paths]
-        ).to(DEVICE)
-        vectors = model.encode_image(preprocesed_img)
+        )
+        vectors = []
+        for img in tqdm.tqdm(preprocesed_img):
+            vector = model.encode_image(img.unsqueeze(0).to(DEVICE))
+            vectors.append(vector.reshape(-1).to("cpu"))
+        vectors = torch.stack(vectors)
         # normalize vectors prior
         vectors /= vectors.norm(dim=-1, keepdim=True)
     return vectors
@@ -94,21 +100,23 @@ def main():
     )
 
     # encode suspect images
+    print("Encoding suspect images")
     suspect_vectors = encode_image(
         model, preprocess, list(suspect_dir.glob("*.png"))
     )
 
     # encode cropped images
+    print("Encoding cropped images")
     cropped_vectors = encode_image(
         model, preprocess, df["Image_Path"].values.tolist()
     )
 
     # compute cosine similarity
     # shape=(num_cropped, num_suspect)
-    similarity_matrix = (cropped_vectors @ suspect_vectors.T).squeeze(0)
+    similarity_matrix = cropped_vectors.float() @ suspect_vectors.T.float()
 
     # find the most similar image
-    max_similarity = torch.max(similarity_matrix, dim=1)
+    max_similarity = torch.max(similarity_matrix, dim=1).values
 
     # check if similarity is greater than threshold
     is_suspect = torch.where(max_similarity > args.similarity_threshold, 1, 0)
