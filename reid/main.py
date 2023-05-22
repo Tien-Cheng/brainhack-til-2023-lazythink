@@ -18,22 +18,22 @@ def parse_args():
         )
     )
     parser.add_argument(
-        "suspect-dir",
+        "suspect_dir",
         help="The directory of suspect images",
         type=str,
     )
     parser.add_argument(
-        "cropped-dir",
+        "cropped_dir",
         help="The directory of cropped images",
         type=str,
     )
     parser.add_argument(
-        "output-csv",
+        "output_csv",
         help="The output csv file",
         type=str,
     )
     parser.add_argument(
-        "--similarity-threshold",
+        "--similarity_threshold",
         help="The similarity threshold",
         type=float,
         default=0.91,
@@ -70,7 +70,6 @@ def main():
     args = parse_args()
     assert Path(args.suspect_dir).is_dir()
     assert Path(args.cropped_dir).is_dir()
-    assert Path(args.output_csv).is_file()
 
     suspect_dir = Path(args.suspect_dir)
     cropped_dir = Path(args.cropped_dir)
