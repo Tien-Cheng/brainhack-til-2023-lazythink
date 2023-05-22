@@ -220,10 +220,10 @@ def main():
                             "Image_ID": image_id,
                             "Image_Name": export_image_name,
                             "confidence": confidence,
-                            "ymin": ymin,
-                            "xmin": xmin,
-                            "ymax": ymax,
-                            "xmax": xmax,
+                            "ymin": ymin/720,
+                            "xmin": xmin/1280,
+                            "ymax": ymax/720,
+                            "xmax": xmax/1280,
                         }
                     )
 
