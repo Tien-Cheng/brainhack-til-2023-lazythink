@@ -191,6 +191,7 @@ def main():
 
     # Export images
     print("Exporting images...")
+    image_infos = []
     for image_name, cat_arr in tqdm.tqdm(img_det.items()):
         for img_arr in cat_arr:
             # Filter out detections with low confidence
@@ -203,15 +204,40 @@ def main():
                 img = cv2.imread(str(img_root / image_name))
                 for idx, detection in enumerate(filtered_detections):
                     xmin, ymin, xmax, ymax = detection[:4].astype(np.int32)
+                    confidence = detection[4]
                     cropped_image = img[ymin:ymax, xmin:xmax]
 
+                    image_id = image_name.replace(".png", "")
+                    export_image_name = f"{image_id}-{idx}.png"
+
                     cv2.imwrite(
-                        str(
-                            out_dir
-                            / f"{image_name.replace('.png', '')}-{idx}.png"
-                        ),
+                        str(out_dir / export_image_name),
                         cropped_image,
                     )
+
+                    image_infos.append(
+                        {
+                            "Image_ID": image_id,
+                            "Image_Name": export_image_name,
+                            "confidence": confidence,
+                            "ymin": ymin,
+                            "xmin": xmin,
+                            "ymax": ymax,
+                            "xmax": xmax,
+                        }
+                    )
+
+    # Export image infos as csv
+    print("Exporting image infos...")
+    with open(out_dir / "image_infos.csv", "w") as f:
+        f.write("Image_ID,Image_Name,confidence,ymin,xmin,ymax,xmax\n")
+        for image_info in image_infos:
+            f.write(
+                f"{image_info['Image_ID']},{image_info['Image_Name']},"
+                f"{image_info['confidence']},{image_info['ymin']},"
+                f"{image_info['xmin']},{image_info['ymax']},"
+                f"{image_info['xmax']}\n"
+            )
 
     print("All images exported successfully!")
 
