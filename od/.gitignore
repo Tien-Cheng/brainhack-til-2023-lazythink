@@ -3,3 +3,13 @@ mmdetection
 
 # Ignore images
 data/images
+
+# Ignore work_dirs
+work_dirs
+
+# Ignore DetVisGUI
+DetVisGUI
+
+# Cropped image dir
+output
+test-detected.zip

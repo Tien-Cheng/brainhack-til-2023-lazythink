@@ -1,7 +1,8 @@
 # dataset settings
 dataset_type = "CocoDataset"
 data_root = "data/"
-classes = ("a", "b", "c", "d", "e")  # TODO: Fix this
+classes = "plushie"
+
 
 # Example to use different file client
 # Method 1: simply set the data root and let the file I/O module
@@ -18,19 +19,24 @@ classes = ("a", "b", "c", "d", "e")  # TODO: Fix this
 #      }))
 backend_args = None
 
+# Import custom noise pipeline
+custom_imports = dict(
+    imports=["configs.custom_transform"],
+    allow_failed_imports=False,
+)
+
 train_pipeline = [
     dict(type="LoadImageFromFile", backend_args=backend_args),
     dict(type="LoadAnnotations", with_bbox=True),
-    dict(
-        type="RandomResize", scale=[(2048, 800), (2048, 1024)], keep_ratio=True
-    ),
+    dict(type="Resize", scale=(1280, 720), keep_ratio=True),
     dict(type="RandomFlip", prob=0.5),
+    dict(type="RandomGaussian", prob=0.5),
     dict(type="PackDetInputs"),
 ]
 
 test_pipeline = [
     dict(type="LoadImageFromFile", backend_args=backend_args),
-    dict(type="Resize", scale=(2048, 1024), keep_ratio=True),
+    dict(type="Resize", scale=(1280, 720), keep_ratio=True),
     # If you don't have a gt annotation, delete the pipeline
     dict(type="LoadAnnotations", with_bbox=True),
     dict(
@@ -55,14 +61,14 @@ train_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/train.json",
-        data_prefix=dict(img="images"),
+        ann_file="labels-train.json",
+        data_prefix=dict(img="images/train"),
         pipeline=train_pipeline,
     ),
 )
 
 val_dataloader = dict(
-    batch_size=1,
+    batch_size=2,
     num_workers=2,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=False),
@@ -72,14 +78,14 @@ val_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/val.json",
-        data_prefix=dict(img="images"),
+        ann_file="labels-val.json",
+        data_prefix=dict(img="images/validation"),
         pipeline=test_pipeline,
     ),
 )
 
 test_dataloader = dict(
-    batch_size=1,
+    batch_size=2,
     num_workers=2,
     persistent_workers=True,
     sampler=dict(type="DefaultSampler", shuffle=True),
@@ -89,17 +95,24 @@ test_dataloader = dict(
         # explicitly add your class names to the field `metainfo`
         metainfo=dict(classes=classes),
         data_root=data_root,
-        ann_file="labels/test.json",
-        data_prefix=dict(img="images"),
+        ann_file="labels-test.json",
+        data_prefix=dict(img="images/test"),
         pipeline=test_pipeline,
     ),
 )
 
 
 val_evaluator = dict(
-    type='CocoMetric',
-    ann_file=data_root + 'annotations/instancesonly_filtered_gtFine_val.json',
-    metric='bbox',
-    backend_args=backend_args)
+    type="CocoMetric",
+    ann_file=data_root + "/labels-val.json",
+    metric="bbox",
+    backend_args=backend_args,
+)
 
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type="CocoMetric",
+    ann_file=data_root + "/labels-test.json",
+    metric="bbox",
+    format_only=True,
+    outfile_prefix="./work_dirs/coco_detection/test",
+)

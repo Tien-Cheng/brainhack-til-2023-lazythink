@@ -1,0 +1,10 @@
+transformers==4.28.0 
+evaluate 
+datasets 
+librosa 
+jiwer 
+wandb 
+accelerate
+peft
+bitsandbytes
+loralib

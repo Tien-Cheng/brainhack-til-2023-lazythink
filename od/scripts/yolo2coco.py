@@ -49,8 +49,8 @@ def collect_image_infos(
             exclude_extensions is not None
             and not image_path.lower().endswith(exclude_extensions)
         ):
-            image_path = os.path.join(path, image_path)
-            img_pillow = Image.open(image_path)
+            full_image_path = os.path.join(path, image_path)
+            img_pillow = Image.open(full_image_path)
             img_info = {
                 "fileId": Path(image_path).stem,
                 "filename": image_path,
@@ -79,7 +79,8 @@ def collect_yolo_annotations(
                     continue
                 annotations.append(
                     {
-                        "classes": int(infos[0]),
+                        # "classes": int(infos[0]),
+                        "classes": 0,  # Treat all class as plushie
                         "n_x": float(infos[1]),
                         "n_y": float(infos[2]),
                         "n_w": float(infos[3]),
