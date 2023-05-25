@@ -82,6 +82,17 @@ def get_trainer(
     return trainer
 
 
+@click.command()
+@click.option(
+    "--architechture", type=click.Choice(["dino", "nnclr", "simclr", "smog"])
+)
+@click.option(
+    "--backbone",
+    type=click.Choice(["resnet50", "efficientnet_v2_m", "convnext_base"]),
+)
+@click.option("--batch_size", type=int, default=64)
+@click.option("--max_epochs", type=int, default=100)
+@click.option("--devices", type=str, default="0")
 def main(architechture, backbone, batch_size, max_epochs, devices):
     model = get_model(architechture, backbone)
     train_dataloader = get_dataloader(
@@ -95,3 +106,17 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
     trainer = get_trainer(max_epochs=max_epochs, devices=devices)
 
     trainer.fit(model, train_dataloader)
+
+
+if __name__ == "__main__":
+    """
+    Script to train the ReID model using lightly.ai and pytorch-lightning
+
+    Example:
+    PYTHONPATH=. python src_lightly/train.py --architechture dino \
+      --backbone resnet50 \
+      --batch_size 64 \
+      --max_epochs 100 \
+      --devices 0
+    """
+    main()
