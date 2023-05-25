@@ -78,7 +78,10 @@ def get_dataloader(
 def get_trainer(
     max_epochs: int, devices: Union[str, int, List[int]]
 ) -> pl.Trainer:
-    trainer = pl.Trainer(max_epochs=max_epochs, devices=devices)
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+    trainer = pl.Trainer(
+        max_epochs=max_epochs, accelerator=accelerator, devices=devices
+    )
     return trainer
 
 
