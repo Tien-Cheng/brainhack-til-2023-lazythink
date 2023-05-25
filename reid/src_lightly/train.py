@@ -3,6 +3,7 @@ from typing import Literal, Union, List
 import click
 import torch
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import ModelCheckpoint
 from lightly.data import LightlyDataset
 from lightly.data.multi_view_collate import MultiViewCollate
 from lightly.transforms.dino_transform import DINOTransform
@@ -76,11 +77,18 @@ def get_dataloader(
 
 
 def get_trainer(
-    max_epochs: int, devices: Union[str, int, List[int]]
+    max_epochs: int, devices: Union[str, int, List[int]], architechture: str
 ) -> pl.Trainer:
     accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+    checkpoint_callback = ModelCheckpoint(
+        dirpath=f"checkpoint/{architechture}/", every_n_epochs=10
+    )
+
     trainer = pl.Trainer(
-        max_epochs=max_epochs, accelerator=accelerator, devices=devices
+        max_epochs=max_epochs,
+        accelerator=accelerator,
+        devices=devices,
+        callbacks=[checkpoint_callback],
     )
     return trainer
 
@@ -106,7 +114,9 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
         batch_size=batch_size,
         num_workers=2,
     )
-    trainer = get_trainer(max_epochs=max_epochs, devices=devices)
+    trainer = get_trainer(
+        max_epochs=max_epochs, devices=devices, architechture=architechture
+    )
 
     trainer.fit(model, train_dataloader)
 
