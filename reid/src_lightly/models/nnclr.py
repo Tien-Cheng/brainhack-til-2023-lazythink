@@ -36,6 +36,7 @@ class NNCLR(pl.LightningModule):
         z0 = self.memory_bank(z0, update=False)
         z1 = self.memory_bank(z1, update=True)
         loss = 0.5 * (self.criterion(z0, p1) + self.criterion(z1, p0))
+        self.log("train/loss", loss)
         return loss
 
     def configure_optimizers(self):
