@@ -41,8 +41,7 @@ class SMoGModel(pl.LightningModule):
             raise NotImplementedError()
 
         # create a model based on ResNet
-        self.projection_head = heads.SMoGProjectionHead(512, 2048, 128)
-        self.prediction_head = heads.SMoGPredictionHead(128, 2048, 128)
+        self.prediction_head = heads.SMoGPredictionHead(input_dim, 2048, 128)
         self.backbone_momentum = copy.deepcopy(self.backbone)
         self.projection_head_momentum = copy.deepcopy(self.projection_head)
         utils.deactivate_requires_grad(self.backbone_momentum)
