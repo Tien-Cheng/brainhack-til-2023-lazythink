@@ -4,6 +4,7 @@ import click
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import WandbLogger
 from lightly.data import LightlyDataset
 from lightly.data.multi_view_collate import MultiViewCollate
 from lightly.transforms.dino_transform import DINOTransform
@@ -81,14 +82,16 @@ def get_trainer(
 ) -> pl.Trainer:
     accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     checkpoint_callback = ModelCheckpoint(
-        dirpath=f"checkpoint/{architechture}/", every_n_epochs=10
+        dirpath=f"checkpoints/{architechture}/", every_n_epochs=10
     )
+    wandb_logger = WandbLogger(project="til-23-reid-lightly-runs")
 
     trainer = pl.Trainer(
         max_epochs=max_epochs,
         accelerator=accelerator,
         devices=devices,
         callbacks=[checkpoint_callback],
+        logger=wandb_logger,
     )
     return trainer
 
@@ -112,7 +115,7 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
         label_prefix="labels/yolo/train_labels",
         transform_type=architechture,
         batch_size=batch_size,
-        num_workers=2,
+        num_workers=20,
     )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
