@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "reid"
+version = "0.1.0"
+description = ""
+authors = ["Wong Zhao Wu <wongzhaowu@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+lightly = "^1.4.6"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+ipykernel = "^6.23.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
