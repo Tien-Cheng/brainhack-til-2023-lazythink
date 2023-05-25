@@ -112,7 +112,7 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
         label_prefix="labels/yolo/train_labels",
         transform_type=architechture,
         batch_size=batch_size,
-        num_workers=2,
+        num_workers=12,
     )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
