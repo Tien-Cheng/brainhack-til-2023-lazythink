@@ -23,26 +23,29 @@ class DINO(pl.LightningModule):
         if backbone == "resnet50":
             backbone = torchvision.models.resnet50(weights="IMAGENET1K_V2")
             self.backbone = nn.Sequential(*list(backbone.children())[:-1])
+            input_dim = 1000
         elif backbone == "efficientnet_v2_m":
             backbone = torchvision.models.efficientnet_v2_m(
                 weights="IMAGENET1K_V1"
             )
             self.backbone = nn.Sequential(*list(backbone.children())[:-1])
+            input_dim = 1000
         elif backbone == "convnext_base":
             backbone = torchvision.models.convnext_base(
                 weights="IMAGENET1K_V1"
             )
             self.backbone = nn.Sequential(*list(backbone.children())[:-1])
+            input_dim = 1000
         else:
             raise NotImplementedError()
 
-        input_dim = 512
+        # input_dim = 512
         # instead of a resnet you can also use a vision transformer backbone
         # as in the
         # original paper (you might have to reduce the batch size in this case)
         # backbone = torch.hub.load('facebookresearch/dino:main', 'dino_vits16'
         # , pretrained=False)
-        # input_dim = backbone.embed_dim
+        # input_dim = self.backbone.embed_dim
 
         self.student_backbone = backbone
         self.student_head = DINOProjectionHead(
