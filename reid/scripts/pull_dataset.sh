@@ -5,11 +5,11 @@ gcloud auth login
 
 # Pull the dataset from GCS
 mkdir -p /tmp/cv
-gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Train.zip /tmp/Train.zip
-gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Validation.zip /tmp/Validation.zip
-gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Test.zip /tmp/Test.zip
-gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/train_labels.zip /tmp/train_labels.zip
-gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/val_labels.zip /tmp/val_labels.zip
+gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Train.zip /tmp/cv/Train.zip
+gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Validation.zip /tmp/cv/Validation.zip
+gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/Test.zip /tmp/cv/Test.zip
+gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/train_labels.zip /tmp/cv/train_labels.zip
+gsutil cp gs://cloud-ai-platform-e8edc327-855c-4911-bb8e-205517f8c899/cv/val_labels.zip /tmp/cv/val_labels.zip
 
 # Unzip the dataset
 mkdir -p data/images
