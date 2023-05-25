@@ -1,1 +1,5 @@
 data
+
+# Pytorch Lightning logs and checkpoints
+lightning_logs
+checkpoints
