@@ -117,6 +117,7 @@ class SMoGModel(pl.LightningModule):
         # use memory bank to periodically reset the group features with k-means
         self.memory_bank(x0_encoded, update=True)
 
+        self.log("train/loss", loss)
         return loss
 
     def configure_optimizers(self):
