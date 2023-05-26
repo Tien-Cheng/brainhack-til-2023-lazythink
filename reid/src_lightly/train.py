@@ -234,7 +234,7 @@ def main(
         num_classes=10,  # Number of class in validation set
         knn_k=knn_k,
         knn_t=knn_t,
-    ).load_from_checkpoint("checkpoints/simclr/epoch=99-step=9600.ckpt")
+    )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
     )
