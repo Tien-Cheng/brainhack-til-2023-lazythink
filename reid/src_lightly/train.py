@@ -123,8 +123,8 @@ def get_dataloader(
         val_dataset,
         batch_size=batch_size,
         collate_fn=MultiViewCollate(),
-        shuffle=True,
-        drop_last=True,
+        shuffle=False,
+        drop_last=False,
         num_workers=num_workers,
     )
 
@@ -140,9 +140,9 @@ def get_dataloader(
         suspect_dataset,
         batch_size=batch_size,
         collate_fn=MultiViewCollate(),
-        shuffle=True,
-        drop_last=True,
-        num_workers=num_workers,
+        shuffle=False,
+        drop_last=False,
+        num_workers=num_workers // 2,
     )
 
     return train_dataloader, val_dataloader, suspect_dataloader
