@@ -1,25 +1,36 @@
 import copy
 from typing import Literal
 
-import pytorch_lightning as pl
 import torch
 import torchvision
 from sklearn.cluster import KMeans
 from torch import nn
-
 from lightly import loss
 from lightly.models import utils
 from lightly.models.modules import heads
 
+from src_lightly.models.base import BenchmarkModule
 
-class SMoGModel(pl.LightningModule):
+
+class SMoGModel(BenchmarkModule):
     def __init__(
         self,
+        dataloader_suspect,
+        suspect_labels,
+        num_classes,
+        knn_k,
+        knn_t,
         backbone: Literal[
             "resnet50", "efficientnet_v2_m", "convnext_base"
         ] = "resnet50",
     ):
-        super().__init__()
+        super().__init__(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
         # create a ResNet backbone and remove the classification head
         if backbone == "resnet50":
             backbone = torchvision.models.resnet50(weights="IMAGENET1K_V2")
@@ -121,6 +132,7 @@ class SMoGModel(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        super().validation_step(batch, batch_idx)
         (x0, x1), _, _ = batch
 
         x0_features = self.backbone(x0).flatten(start_dim=1)

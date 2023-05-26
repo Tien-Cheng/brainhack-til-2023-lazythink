@@ -1,25 +1,36 @@
 import copy
 from typing import Literal
 
-import pytorch_lightning as pl
 import torch
 import torchvision
 from torch import nn
-
 from lightly.models.utils import deactivate_requires_grad, update_momentum
 from lightly.loss import DINOLoss
 from lightly.models.modules import DINOProjectionHead
 from lightly.utils.scheduler import cosine_schedule
 
+from src_lightly.models.base import BenchmarkModule
 
-class DINO(pl.LightningModule):
+
+class DINO(BenchmarkModule):
     def __init__(
         self,
+        dataloader_suspect,
+        suspect_labels,
+        num_classes,
+        knn_k,
+        knn_t,
         backbone: Literal[
             "resnet50", "efficientnet_v2_m", "convnext_base"
         ] = "resnet50",
     ):
-        super().__init__()
+        super().__init__(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
         if backbone == "resnet50":
             backbone = torchvision.models.resnet50(weights="IMAGENET1K_V2")
             self.backbone = nn.Sequential(*list(backbone.children())[:-1])
@@ -88,6 +99,7 @@ class DINO(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        super().validation_step(batch, batch_idx)
         views, _, _ = batch
         views = [view.to(self.device) for view in views]
         global_views = views[:2]

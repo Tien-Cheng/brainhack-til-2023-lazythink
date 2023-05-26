@@ -1,23 +1,33 @@
 from typing import Literal
 
-import pytorch_lightning as pl
 import torch
 import torchvision
 from torch import nn
-
-
 from lightly.models.modules import SimCLRProjectionHead
 from lightly.loss import NTXentLoss
 
+from src_lightly.models.base import BenchmarkModule
 
-class SimCLR(pl.LightningModule):
+
+class SimCLR(BenchmarkModule):
     def __init__(
         self,
+        dataloader_suspect,
+        suspect_labels,
+        num_classes,
+        knn_k,
+        knn_t,
         backbone: Literal[
             "resnet50", "efficientnet_v2_m", "convnext_base"
         ] = "resnet50",
     ):
-        super().__init__()
+        super().__init__(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
 
         if backbone == "resnet50":
             backbone = torchvision.models.resnet50(weights="IMAGENET1K_V2")
@@ -54,7 +64,8 @@ class SimCLR(pl.LightningModule):
         self.log("train/loss", loss)
         return loss
 
-    def validation_step(self, batch, batch_index):
+    def validation_step(self, batch, batch_idx):
+        super().validation_step(batch, batch_idx)
         (x0, x1), _, _ = batch
         z0 = self.forward(x0)
         z1 = self.forward(x1)

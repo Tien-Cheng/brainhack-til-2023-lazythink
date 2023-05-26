@@ -1,4 +1,3 @@
-import pytorch_lightning as pl
 import torch
 import torchvision
 from torch import nn
@@ -10,10 +9,25 @@ from lightly.models.modules import (
     NNMemoryBankModule,
 )
 
+from src_lightly.models.base import BenchmarkModule
 
-class NNCLR(pl.LightningModule):
-    def __init__(self):
-        super().__init__()
+
+class NNCLR(BenchmarkModule):
+    def __init__(
+        self,
+        dataloader_suspect,
+        suspect_labels,
+        num_classes,
+        knn_k,
+        knn_t,
+    ):
+        super().__init__(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
         resnet = torchvision.models.resnet18()
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.projection_head = NNCLRProjectionHead(512, 512, 128)
@@ -40,6 +54,7 @@ class NNCLR(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        super().validation_step(batch, batch_idx)
         (x0, x1), _, _ = batch
         z0, p0 = self.forward(x0)
         z1, p1 = self.forward(x1)
