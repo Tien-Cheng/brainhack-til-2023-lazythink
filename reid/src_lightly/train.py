@@ -157,7 +157,7 @@ def get_dataloader(
         collate_fn=MultiViewCollate(),
         shuffle=False,
         drop_last=False,
-        num_workers=num_workers // 2,
+        num_workers=num_workers // 4,
     )
 
     suspect_dataloader = torch.utils.data.DataLoader(
@@ -223,7 +223,7 @@ def main(
         val_label_prefix="labels/yolo/val_labels",
         transform_type=architechture,
         batch_size=batch_size,
-        num_workers=16,
+        num_workers=12,
     )
 
     model = get_model(
