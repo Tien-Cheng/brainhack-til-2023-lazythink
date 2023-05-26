@@ -19,17 +19,50 @@ from src_lightly.models.smog import SMoGModel
 
 
 def get_model(
-    model_type: Literal["dino", "nnclr", "simclr", "smog"],
+    dataloader_suspect: torch.utils.data.DataLoader,
+    suspect_labels: List[int],
+    num_classes: int,
+    architechture: Literal["dino", "nnclr", "simclr", "smog"],
     backbone: Literal["resnet50", "efficientnet_v2_m", "convnext_base"],
+    knn_k: int,
+    knn_t: float,
 ) -> pl.LightningModule:
-    if model_type == "dino":
-        return DINO(backbone)
-    elif model_type == "nnclr":
-        return NNCLR(backbone)
-    elif model_type == "simclr":
-        return SimCLR(backbone)
-    elif model_type == "smog":
-        return SMoGModel(backbone)
+    if architechture == "dino":
+        return DINO(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            backbone=backbone,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
+    elif architechture == "nnclr":
+        return NNCLR(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            backbone=backbone,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
+    elif architechture == "simclr":
+        return SimCLR(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            backbone=backbone,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
+    elif architechture == "smog":
+        return SMoGModel(
+            dataloader_suspect=dataloader_suspect,
+            suspect_labels=suspect_labels,
+            num_classes=num_classes,
+            backbone=backbone,
+            knn_k=knn_k,
+            knn_t=knn_t,
+        )
     else:
         raise NotImplementedError()
 
@@ -61,7 +94,9 @@ def get_dataloader(
     else:
         raise NotImplementedError()
 
-    train_yolo_dataset = YoloPlushieDataset(root_dir, train_img_prefix, train_label_prefix)
+    train_yolo_dataset = YoloPlushieDataset(
+        root_dir, train_img_prefix, train_label_prefix
+    )
 
     train_dataset = LightlyDataset.from_torch_dataset(
         train_yolo_dataset, transform=transform
@@ -76,7 +111,9 @@ def get_dataloader(
         num_workers=num_workers,
     )
 
-    val_yolo_dataset = YoloPlushieDataset(root_dir, val_img_prefix, val_label_prefix)
+    val_yolo_dataset = YoloPlushieDataset(
+        root_dir, val_img_prefix, val_label_prefix
+    )
 
     val_dataset = LightlyDataset.from_torch_dataset(
         val_yolo_dataset, transform=transform
@@ -91,7 +128,9 @@ def get_dataloader(
         num_workers=num_workers,
     )
 
-    suspect_yolo_dataset = YoloPlushieDataset(root_dir, val_img_prefix, val_label_prefix, suspect=True)
+    suspect_yolo_dataset = YoloPlushieDataset(
+        root_dir, val_img_prefix, val_label_prefix, suspect=True
+    )
 
     suspect_dataset = LightlyDataset.from_torch_dataset(
         suspect_yolo_dataset, transform=transform
@@ -139,8 +178,17 @@ def get_trainer(
 @click.option("--batch_size", type=int, default=64)
 @click.option("--max_epochs", type=int, default=100)
 @click.option("--devices", type=str, default="0")
-def main(architechture, backbone, batch_size, max_epochs, devices):
-    model = get_model(architechture, backbone)
+@click.option("--knn_k", type=int, default=10)
+@click.option("--knn_t", type=float, default=0.1)
+def main(
+    architechture: Literal["dino", "nnclr", "simclr", "smog"],
+    backbone: Literal["resnet50", "efficientnet_v2_m", "convnext_base"],
+    batch_size: int,
+    max_epochs: int,
+    devices: str,
+    knn_k: int,
+    knn_t: float,
+):
     train_dataloader, val_dataloader, suspect_dataloader = get_dataloader(
         root_dir="data",
         img_prefix="images/train",
@@ -148,6 +196,16 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
         transform_type=architechture,
         batch_size=batch_size,
         num_workers=12,
+    )
+
+    model = get_model(
+        model_type=architechture,
+        suspect_dataloader=suspect_dataloader,
+        suspect_labels=[1, 0, 3, 7],  # validation label identified as suspect
+        num_classes=10,  # Number of class in validation set
+        backbone=backbone,
+        knn_k=knn_k,
+        knn_t=knn_t,
     )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
