@@ -19,11 +19,11 @@ from src_lightly.models.smog import SMoGModel
 
 
 def get_model(
+    architechture: Literal["dino", "nnclr", "simclr", "smog"],
+    backbone: Literal["resnet50", "efficientnet_v2_m", "convnext_base"],
     dataloader_suspect: torch.utils.data.DataLoader,
     suspect_labels: List[int],
     num_classes: int,
-    architechture: Literal["dino", "nnclr", "simclr", "smog"],
-    backbone: Literal["resnet50", "efficientnet_v2_m", "convnext_base"],
     knn_k: int,
     knn_t: float,
 ) -> pl.LightningModule:
@@ -203,11 +203,11 @@ def main(
     )
 
     model = get_model(
-        model_type=architechture,
+        architechture=architechture,
+        backbone=backbone,
         suspect_dataloader=suspect_dataloader,
         suspect_labels=[1, 0, 3, 7],  # validation label identified as suspect
         num_classes=10,  # Number of class in validation set
-        backbone=backbone,
         knn_k=knn_k,
         knn_t=knn_t,
     )
