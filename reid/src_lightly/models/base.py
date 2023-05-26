@@ -90,7 +90,7 @@ class BenchmarkModule(pl.LightningModule):
         self.total_num = 0
         self.total_top1 = 0.0
 
-    def on_validation_epoch_start(self, trainer, pl_module):
+    def on_validation_epoch_start(self, **kwargs):
         """Called to encode features for suspect on validation start"""
         self.backbone.eval()
         self.suspect_features = []
@@ -142,7 +142,7 @@ class BenchmarkModule(pl.LightningModule):
             self.total_num += batch_size_num
             self.total_top1 += top1
 
-    def on_validation_epoch_end(self, trainer, pl_module):
+    def on_validation_epoch_end(self, **kwargs):
         acc = float(self.total_top1 / self.total_num)
         if acc > self.max_accuracy:
             self.max_accuracy = acc
