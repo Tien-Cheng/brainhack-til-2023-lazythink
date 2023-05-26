@@ -71,7 +71,7 @@ class BenchmarkModule(pl.LightningModule):
         self,
         dataloader_suspect: torch.utils.data.DataLoader,
         suspect_labels: List[int],
-        classes=10,
+        num_classes=10,
         knn_k=10,
         knn_t=0.1,
     ):
@@ -79,11 +79,11 @@ class BenchmarkModule(pl.LightningModule):
         self.max_accuracy = 0.0
         self.dataloader_suspect = dataloader_suspect
         self.suspect_map = (
-            torch.zeros((classes,))
+            torch.zeros((num_classes,))
             .scatter_(0, torch.tensor(suspect_labels), 1)
             .to("cuda" if torch.cuda.is_available() else "cpu")
         )
-        self.classes = classes
+        self.classes = num_classes
         self.knn_k = knn_k
         self.knn_t = knn_t
         self.backbone = nn.Module()
