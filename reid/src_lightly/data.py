@@ -6,7 +6,6 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-
 class YoloPlushieDataset(Dataset):
     """Plushie dataset in yolo format."""
 
@@ -18,6 +17,7 @@ class YoloPlushieDataset(Dataset):
         transform=None,
         target_transform=None,
         suspect=False,
+        suspect_path="filtered_val_data.json",
     ):
         """
         Arguments:
@@ -29,6 +29,9 @@ class YoloPlushieDataset(Dataset):
                 in an PIL image and returns a transformed version.
             target_transform {callable, optional} -- A function/transform that
                 takes in the target and transforms it.
+            suspect {bool, optional} -- Whether to include suspect images.
+            suspect_path {str, optional} -- Path to suspect images json file
+                that contains list of suspect images file name.
         """
         self.root_dir = Path(root_dir)
         self.img_dir = self.root_dir / img_prefix
@@ -37,28 +40,32 @@ class YoloPlushieDataset(Dataset):
         self.target_transform = target_transform
         self.plushie_labels = []
         self.suspect = suspect
-        with open('filtered_val_data.json', 'r') as file:
+        with open(suspect_path, 'r') as file:
             self.suspect_images = json.load(file)
-        
+
         for label_path in self.label_dir.glob("*.txt"):
-            if not suspect or label_path.split('/')[-1] in self.suspect_images:
-                with open(label_path) as f:
-                    for idx, label_infos in enumerate(f.readlines()):
-                        [c, n_x, n_y, n_w, n_h] = label_infos.split(" ")
-                        self.plushie_labels.append(
-                            {
-                                "index": "{}_{}".format(label_path.stem, idx),
-                                "class": int(c),
-                                "bbox": [
-                                    float(n_x),
-                                    float(n_y),
-                                    float(n_w),
-                                    float(n_h),
-                                ],
-                                "path": self.img_dir
-                                / (str(label_path.stem) + ".png"),
-                            }
-                        )
+            if label_path.name in self.suspect_images:
+                # Skip suspect images if not in suspect mode
+                if not suspect:
+                    continue
+
+            with open(label_path) as f:
+                for idx, label_infos in enumerate(f.readlines()):
+                    [c, n_x, n_y, n_w, n_h] = label_infos.split(" ")
+                    self.plushie_labels.append(
+                        {
+                            "index": "{}_{}".format(label_path.stem, idx),
+                            "class": int(c),
+                            "bbox": [
+                                float(n_x),
+                                float(n_y),
+                                float(n_w),
+                                float(n_h),
+                            ],
+                            "path": self.img_dir
+                            / (str(label_path.stem) + ".png"),
+                        }
+                    )
 
     def __len__(self):
         return len(self.plushie_labels)
