@@ -41,6 +41,7 @@ def get_dataloader(
     transform_type: Literal["dino", "nnclr", "simclr", "smog"],
     batch_size: int = 64,
     num_workers: int = 2,
+    suspect: bool = False,
 ) -> torch.utils.data.DataLoader:
     if transform_type == "dino":
         transform = DINOTransform()
@@ -59,7 +60,7 @@ def get_dataloader(
     else:
         raise NotImplementedError()
 
-    train_yolo_dataset = YoloPlushieDataset(root_dir, img_prefix, label_prefix)
+    train_yolo_dataset = YoloPlushieDataset(root_dir, img_prefix, label_prefix, suspect=suspect)
 
     train_dataset = LightlyDataset.from_torch_dataset(
         train_yolo_dataset, transform=transform
@@ -117,11 +118,28 @@ def main(architechture, backbone, batch_size, max_epochs, devices):
         batch_size=batch_size,
         num_workers=12,
     )
+    val_dataloader = get_dataloader(
+        root_dir="data",
+        img_prefix="images/validate",
+        label_prefix="labels/yolo/val_labels",
+        transform_type=architechture,
+        batch_size=batch_size,
+        num_workers=12,
+    )
+    suspect_dataloader = get_dataloader(
+        root_dir="data",
+        img_prefix="images/train",
+        label_prefix="labels/yolo/train_labels",
+        transform_type=architechture,
+        batch_size=batch_size,
+        num_workers=12,
+        suspect=True,
+    )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
     )
 
-    trainer.fit(model, train_dataloader)
+    trainer.fit(model, train_dataloader, val_dataloader)
 
 
 if __name__ == "__main__":
