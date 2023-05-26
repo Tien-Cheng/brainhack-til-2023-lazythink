@@ -193,11 +193,13 @@ def main(
 ):
     train_dataloader, val_dataloader, suspect_dataloader = get_dataloader(
         root_dir="data",
-        img_prefix="images/train",
-        label_prefix="labels/yolo/train_labels",
+        train_img_prefix="images/train",
+        train_label_prefix="labels/yolo/train_labels",
+        val_img_prefix="images/validation",
+        val_label_prefix="labels/yolo/val_labels",
         transform_type=architechture,
         batch_size=batch_size,
-        num_workers=12,
+        num_workers=16,
     )
 
     model = get_model(
