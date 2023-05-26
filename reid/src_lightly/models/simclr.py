@@ -54,6 +54,13 @@ class SimCLR(pl.LightningModule):
         self.log("train/loss", loss)
         return loss
 
+    def validation_step(self, batch, batch_index):
+        (x0, x1), _, _ = batch
+        z0 = self.forward(x0)
+        z1 = self.forward(x1)
+        loss = self.criterion(z0, z1)
+        self.log("val/loss", loss)
+
     def configure_optimizers(self):
         optim = torch.optim.SGD(self.parameters(), lr=0.06)
         return optim

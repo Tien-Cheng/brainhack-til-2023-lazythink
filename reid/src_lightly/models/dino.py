@@ -87,6 +87,17 @@ class DINO(pl.LightningModule):
         self.log("train/loss", loss)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        views, _, _ = batch
+        views = [view.to(self.device) for view in views]
+        global_views = views[:2]
+        teacher_out = [self.forward_teacher(view) for view in global_views]
+        student_out = [self.forward(view) for view in views]
+        loss = self.criterion(
+            teacher_out, student_out, epoch=self.current_epoch
+        )
+        self.log("val/loss", loss)
+
     def on_after_backward(self):
         self.student_head.cancel_last_layer_gradients(
             current_epoch=self.current_epoch

@@ -120,6 +120,24 @@ class SMoGModel(pl.LightningModule):
         self.log("train/loss", loss)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        (x0, x1), _, _ = batch
+
+        x0_features = self.backbone(x0).flatten(start_dim=1)
+        x0_encoded = self.projection_head(x0_features)
+        x0_predicted = self.prediction_head(x0_encoded)
+        x1_features = self.backbone_momentum(x1).flatten(start_dim=1)
+        x1_encoded = self.projection_head_momentum(x1_features)
+
+        # update group features and get group assignments
+        assignments = self.smog.assign_groups(x1_encoded)
+        group_features = self.smog.get_updated_group_features(x0_encoded)
+        logits = self.smog(x0_predicted, group_features, temperature=0.1)
+
+        loss = self.criterion(logits, assignments)
+
+        self.log("val/loss", loss)
+
     def configure_optimizers(self):
         params = (
             list(self.backbone.parameters())
