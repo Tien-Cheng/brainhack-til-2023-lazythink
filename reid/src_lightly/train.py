@@ -191,7 +191,7 @@ def main(
     knn_k: int,
     knn_t: float,
 ):
-    train_dataloader, val_dataloader, suspect_dataloader = get_dataloader(
+    train_dataloader, val_dataloader, dataloader_suspect = get_dataloader(
         root_dir="data",
         train_img_prefix="images/train",
         train_label_prefix="labels/yolo/train_labels",
@@ -205,7 +205,7 @@ def main(
     model = get_model(
         architechture=architechture,
         backbone=backbone,
-        suspect_dataloader=suspect_dataloader,
+        dataloader_suspect=dataloader_suspect,
         suspect_labels=[1, 0, 3, 7],  # validation label identified as suspect
         num_classes=10,  # Number of class in validation set
         knn_k=knn_k,
