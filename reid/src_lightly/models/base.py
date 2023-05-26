@@ -6,6 +6,32 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 
 
+# code for KNN prediction
+# https://github.com/facebookresearch/dino/blob/main/eval_knn.py#L143
+def dino_knn(features, feature_bank, feature_labels, num_classes, knn_k, knn_t):
+    batch_size = features.size(0)
+    retrieval_one_hot = torch.zeros(knn_k, num_classes, device=features.device)
+
+    # calculate the dot product and compute top-k neighbors
+    similarity = torch.mm(features, feature_bank)
+    distances, indices = similarity.topk(knn_k, largest=True, sorted=True)
+    candidates = feature_labels.view(1, -1).expand(batch_size, -1)
+    retrieved_neighbors = torch.gather(candidates, 1, indices)
+
+    retrieval_one_hot.resize_(batch_size * knn_k, num_classes).zero_()
+    retrieval_one_hot.scatter_(1, retrieved_neighbors.view(-1, 1), 1)
+    distances_transform = distances.clone().div_(knn_t).exp_()
+    probs = torch.sum(
+        torch.mul(
+            retrieval_one_hot.view(batch_size, -1, num_classes),
+            distances_transform.view(batch_size, -1, 1),
+        ),
+        1,
+    )
+    _, predictions = probs.sort(1, True)
+
+    return predictions
+
 # code for kNN prediction from here:
 # https://colab.research.google.com/github/facebookresearch/moco/blob/colab-notebook/colab/moco_cifar10_demo.ipynb
 def knn_predict(
@@ -137,7 +163,7 @@ class BenchmarkModule(pl.LightningModule):
                 self.suspect_map,
             )
             print("is_suspect_label", is_suspect_label)
-            pred_labels = knn_predict(
+            pred_labels = dino_knn(
                 feature,
                 self.suspect_features,
                 self.suspect_targets,
@@ -146,9 +172,10 @@ class BenchmarkModule(pl.LightningModule):
                 self.knn_t,
             )
             print("pred_labels", pred_labels)
-            batch_size_num = images.size(0)
-            top1 = (pred_labels[:, 0] == is_suspect_label).float().sum().item()
-            self.total_num += batch_size_num
+            batch_size = images.size(0)
+            correct = pred_labels.eq(is_suspect_label.view(-1, 1))
+            top1 = correct.narrow(1, 0, 1).sum().item()
+            self.total_num += batch_size
             self.total_top1 += top1
 
     def on_validation_epoch_end(self, **kwargs):
