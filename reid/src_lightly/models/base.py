@@ -129,6 +129,7 @@ class BenchmarkModule(pl.LightningModule):
                 torch.eye(self.classes, device=self.device)[targets],
                 self.suspect_map,
             )
+            print("is_suspect_label", is_suspect_label)
             pred_labels = knn_predict(
                 feature,
                 self.suspect_features,
@@ -137,6 +138,7 @@ class BenchmarkModule(pl.LightningModule):
                 self.knn_k,
                 self.knn_t,
             )
+            print("pred_labels", pred_labels)
             batch_size_num = images.size(0)
             top1 = (pred_labels[:, 0] == is_suspect_label).float().sum().item()
             self.total_num += batch_size_num
