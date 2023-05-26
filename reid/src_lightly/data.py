@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
+
 
 
 class YoloPlushieDataset(Dataset):
@@ -15,6 +17,7 @@ class YoloPlushieDataset(Dataset):
         label_prefix,
         transform=None,
         target_transform=None,
+        suspect=False,
     ):
         """
         Arguments:
@@ -33,25 +36,29 @@ class YoloPlushieDataset(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.plushie_labels = []
-
+        self.suspect = suspect
+        with open('filtered_val_data.json', 'r') as file:
+            self.suspect_images = json.load(file)
+        
         for label_path in self.label_dir.glob("*.txt"):
-            with open(label_path) as f:
-                for idx, label_infos in enumerate(f.readlines()):
-                    [c, n_x, n_y, n_w, n_h] = label_infos.split(" ")
-                    self.plushie_labels.append(
-                        {
-                            "index": "{}_{}".format(label_path.stem, idx),
-                            "class": int(c),
-                            "bbox": [
-                                float(n_x),
-                                float(n_y),
-                                float(n_w),
-                                float(n_h),
-                            ],
-                            "path": self.img_dir
-                            / (str(label_path.stem) + ".png"),
-                        }
-                    )
+            if not suspect or label_path.split('/')[-1] in self.suspect_images:
+                with open(label_path) as f:
+                    for idx, label_infos in enumerate(f.readlines()):
+                        [c, n_x, n_y, n_w, n_h] = label_infos.split(" ")
+                        self.plushie_labels.append(
+                            {
+                                "index": "{}_{}".format(label_path.stem, idx),
+                                "class": int(c),
+                                "bbox": [
+                                    float(n_x),
+                                    float(n_y),
+                                    float(n_w),
+                                    float(n_h),
+                                ],
+                                "path": self.img_dir
+                                / (str(label_path.stem) + ".png"),
+                            }
+                        )
 
     def __len__(self):
         return len(self.plushie_labels)

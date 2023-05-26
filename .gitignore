@@ -165,3 +165,6 @@ reid/suspects/
 # data for plotting distribution
 reid/train_labels/
 reid/val_labels/
+
+# filtering data for reid evaluation
+reid/filtered/
