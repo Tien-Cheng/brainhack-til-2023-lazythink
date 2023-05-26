@@ -87,6 +87,8 @@ class BenchmarkModule(pl.LightningModule):
         self.knn_k = knn_k
         self.knn_t = knn_t
         self.backbone = nn.Module()
+        self.total_num = 0
+        self.total_top1 = 0.0
 
     def on_validation_epoch_start(self, trainer, pl_module):
         """Called to encode features for suspect on validation start"""
@@ -137,16 +139,13 @@ class BenchmarkModule(pl.LightningModule):
             )
             batch_size_num = images.size(0)
             top1 = (pred_labels[:, 0] == is_suspect_label).float().sum().item()
-            return (batch_size_num, top1)
+            self.total_num += batch_size_num
+            self.total_top1 += top1
 
-    def on_validation_epoch_end(self, outputs):
-        if outputs:
-            total_num = 0
-            total_top1 = 0.0
-            for num, top1 in outputs:
-                total_num += num
-                total_top1 += top1
-            acc = float(total_top1 / total_num)
-            if acc > self.max_accuracy:
-                self.max_accuracy = acc
-            self.log("val/top1_acc", acc * 100.0, prog_bar=True)
+    def on_validation_epoch_end(self, trainer, pl_module):
+        acc = float(self.total_top1 / self.total_num)
+        if acc > self.max_accuracy:
+            self.max_accuracy = acc
+        self.log("val/top1_acc", acc * 100.0, prog_bar=True)
+        self.total_num = 0
+        self.total_top1 = 0.0
