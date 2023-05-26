@@ -92,9 +92,10 @@ class BenchmarkModule(pl.LightningModule):
 
     def on_validation_epoch_start(self, **kwargs):
         """Called to encode features for suspect on validation start"""
+        print("Creating suspect feature bank")
         self.backbone.eval()
-        self.suspect_features = []
-        self.suspect_targets = []
+        suspect_features = []
+        suspect_targets = []
         with torch.no_grad():
             for views, _, _ in self.dataloader_suspect:
                 views = [view.to(self.device) for view in views]
@@ -106,8 +107,8 @@ class BenchmarkModule(pl.LightningModule):
                 is_suspect_label = torch.ones(
                     suspect_feature.size(0), dtype=int, device=self.device
                 )
-                self.suspect_features.append(suspect_feature)
-                self.suspect_targets.append(is_suspect_label)
+                suspect_features.append(suspect_feature)
+                suspect_targets.append(is_suspect_label)
         self.suspect_features = (
             torch.cat(self.suspect_features, dim=0).t().contiguous()
         )
@@ -120,6 +121,7 @@ class BenchmarkModule(pl.LightningModule):
         if hasattr(self, "suspect_features") and hasattr(
             self, "suspect_targets"
         ):
+            print("Evaluating every step")
             views, targets, _ = batch
             # Select only first view
             images = views[0].to(self.device)
@@ -144,6 +146,9 @@ class BenchmarkModule(pl.LightningModule):
             self.total_top1 += top1
 
     def on_validation_epoch_end(self, **kwargs):
+        print("Computing accuracy")
+        print(self.total_top1)
+        print(self.total_num)
         acc = float(self.total_top1 / self.total_num)
         if acc > self.max_accuracy:
             self.max_accuracy = acc
