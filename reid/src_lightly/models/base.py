@@ -96,15 +96,15 @@ class BenchmarkModule(pl.LightningModule):
         self.suspect_features = []
         self.suspect_targets = []
         with torch.no_grad():
-            for views, target, _ in self.dataloader_suspect:
+            for views, _, _ in self.dataloader_suspect:
                 views = [view.to(self.device) for view in views]
-                target = target.to(self.device)
                 # Pick first view as img
                 img = views[0]
                 suspect_feature = self.forward(img).squeeze()
                 suspect_feature = F.normalize(suspect_feature, dim=1)
+                # Set all images as suspect
                 is_suspect_label = torch.ones(
-                    suspect_feature.size(0), device=self.device
+                    suspect_feature.size(0), dtype=int, device=self.device
                 )
                 self.suspect_features.append(suspect_feature)
                 self.suspect_targets.append(is_suspect_label)
