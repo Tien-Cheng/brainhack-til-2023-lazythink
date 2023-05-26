@@ -157,7 +157,7 @@ def get_dataloader(
         collate_fn=MultiViewCollate(),
         shuffle=False,
         drop_last=False,
-        num_workers=num_workers,
+        num_workers=num_workers // 2,
     )
 
     suspect_dataloader = torch.utils.data.DataLoader(
@@ -166,7 +166,7 @@ def get_dataloader(
         collate_fn=MultiViewCollate(),
         shuffle=False,
         drop_last=False,
-        num_workers=num_workers // 2,
+        num_workers=2,
     )
 
     return train_dataloader, val_dataloader, suspect_dataloader
