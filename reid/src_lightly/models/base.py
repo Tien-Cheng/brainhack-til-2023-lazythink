@@ -8,7 +8,9 @@ import pytorch_lightning as pl
 
 # code for KNN prediction
 # https://github.com/facebookresearch/dino/blob/main/eval_knn.py#L143
-def dino_knn(features, feature_bank, feature_labels, num_classes, knn_k, knn_t):
+def dino_knn(
+    features, feature_bank, feature_labels, num_classes, knn_k, knn_t
+):
     batch_size = features.size(0)
     retrieval_one_hot = torch.zeros(knn_k, num_classes, device=features.device)
 
@@ -31,60 +33,6 @@ def dino_knn(features, feature_bank, feature_labels, num_classes, knn_k, knn_t):
     _, predictions = probs.sort(1, True)
 
     return predictions
-
-# code for kNN prediction from here:
-# https://colab.research.google.com/github/facebookresearch/moco/blob/colab-notebook/colab/moco_cifar10_demo.ipynb
-def knn_predict(
-    feature,
-    feature_bank,
-    feature_labels,
-    classes: int,
-    knn_k: int = 10,
-    knn_t: float = 0.1,
-):
-    """Helper method to run kNN predictions on features based on a feature bank
-    Args:
-        feature: Tensor of shape [N, D] consisting of N D-dimensional features
-        feature_bank: Tensor of a database of features used for kNN
-        feature_labels: Labels for the features in our feature_bank
-        classes: Number of classes (e.g. 10 for CIFAR-10)
-        knn_k: Number of k neighbors used for kNN
-        knn_t: Temperature parameter used for kNN
-    """
-    # compute cos similarity between each feature vector and feature bank
-    # [B, N]
-    sim_matrix = torch.mm(feature, feature_bank)
-    # [B, K]
-    sim_weight, sim_indices = sim_matrix.topk(k=knn_k, dim=-1)
-    # [B, K]
-    sim_labels = torch.gather(
-        feature_labels.expand(feature.size(0), -1), dim=-1, index=sim_indices
-    )
-    # we do a reweighting of the similarities
-    sim_weight = (sim_weight / knn_t).exp()
-    print("sim_weight", sim_weight)
-
-    # counts for each class
-    one_hot_label = torch.zeros(
-        feature.size(0) * knn_k, classes, device=sim_labels.device
-    )
-    # [B*K, C]
-    one_hot_label = one_hot_label.scatter(
-        dim=-1, index=sim_labels.view(-1, 1), value=1.0
-    )
-    print("one_hot_label", one_hot_label)
-
-    # weighted score ---> [B, C]
-    pred_scores = torch.sum(
-        one_hot_label.view(feature.size(0), -1, classes)
-        * sim_weight.unsqueeze(dim=-1),
-        dim=1,
-    )
-    print("pred_scores", pred_scores)
-    pred_labels = pred_scores.argsort(dim=-1, descending=True)
-
-    print("pred_labels", pred_labels)
-    return pred_labels
 
 
 class BenchmarkModule(pl.LightningModule):
@@ -162,7 +110,6 @@ class BenchmarkModule(pl.LightningModule):
                 torch.eye(self.classes, device=self.device)[targets],
                 self.suspect_map,
             )
-            print("is_suspect_label", is_suspect_label)
             pred_labels = dino_knn(
                 feature,
                 self.suspect_features,
@@ -171,7 +118,6 @@ class BenchmarkModule(pl.LightningModule):
                 self.knn_k,
                 self.knn_t,
             )
-            print("pred_labels", pred_labels)
             batch_size = images.size(0)
             correct = pred_labels.eq(is_suspect_label.view(-1, 1))
             top1 = correct.narrow(1, 0, 1).sum().item()
