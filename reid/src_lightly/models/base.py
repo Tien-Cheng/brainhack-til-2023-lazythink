@@ -92,8 +92,6 @@ class BenchmarkModule(pl.LightningModule):
 
     def on_validation_epoch_start(self, **kwargs):
         """Called to encode features for suspect on validation start"""
-        print("Creating suspect feature bank")
-        self.backbone.eval()
         suspect_features = []
         suspect_targets = []
         with torch.no_grad():
@@ -121,7 +119,6 @@ class BenchmarkModule(pl.LightningModule):
         if hasattr(self, "suspect_features") and hasattr(
             self, "suspect_targets"
         ):
-            print("Evaluating every step")
             views, targets, _ = batch
             # Select only first view
             images = views[0].to(self.device)
@@ -146,7 +143,6 @@ class BenchmarkModule(pl.LightningModule):
             self.total_top1 += top1
 
     def on_validation_epoch_end(self, **kwargs):
-        print("Computing accuracy")
         print(self.total_top1)
         print(self.total_num)
         acc = float(self.total_top1 / self.total_num)
