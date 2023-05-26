@@ -37,7 +37,7 @@ class DINO(BenchmarkModule):
                 "facebookresearch/dino:main", "dino_resnet50"
             )
             self.backbone = nn.Sequential(*list(backbone.children())[:-1])
-            input_dim = 1000
+            input_dim = 2048
         elif backbone == "efficientnet_v2_m":
             backbone = torchvision.models.efficientnet_v2_m(
                 weights="IMAGENET1K_V1"
