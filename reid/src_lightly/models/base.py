@@ -36,6 +36,8 @@ def knn_predict(
     )
     # we do a reweighting of the similarities
     sim_weight = (sim_weight / knn_t).exp()
+    print("sim_weight", sim_weight)
+
     # counts for each class
     one_hot_label = torch.zeros(
         feature.size(0) * knn_k, classes, device=sim_labels.device
@@ -44,13 +46,18 @@ def knn_predict(
     one_hot_label = one_hot_label.scatter(
         dim=-1, index=sim_labels.view(-1, 1), value=1.0
     )
+    print("one_hot_label", one_hot_label)
+
     # weighted score ---> [B, C]
     pred_scores = torch.sum(
         one_hot_label.view(feature.size(0), -1, classes)
         * sim_weight.unsqueeze(dim=-1),
         dim=1,
     )
+    print("pred_scores", pred_scores)
     pred_labels = pred_scores.argsort(dim=-1, descending=True)
+
+    print("pred_labels", pred_labels)
     return pred_labels
 
 
