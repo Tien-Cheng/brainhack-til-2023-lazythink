@@ -110,10 +110,10 @@ class BenchmarkModule(pl.LightningModule):
                 suspect_features.append(suspect_feature)
                 suspect_targets.append(is_suspect_label)
         self.suspect_features = (
-            torch.cat(self.suspect_features, dim=0).t().contiguous()
+            torch.cat(suspect_features, dim=0).t().contiguous()
         )
         self.suspect_targets = (
-            torch.cat(self.suspect_targets, dim=0).t().contiguous()
+            torch.cat(suspect_targets, dim=0).t().contiguous()
         )
 
     def validation_step(self, batch, batch_idx):
