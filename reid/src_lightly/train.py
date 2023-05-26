@@ -153,7 +153,9 @@ def get_trainer(
 ) -> pl.Trainer:
     accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     checkpoint_callback = ModelCheckpoint(
-        dirpath=f"checkpoints/{architechture}/", every_n_epochs=10
+        dirpath=f"checkpoints/{architechture}/",
+        every_n_epochs=10,
+        save_top_k=-1,  # save all checkpoints every 10 epochs
     )
     wandb_logger = WandbLogger(project="til-23-reid-lightly-runs")
 
