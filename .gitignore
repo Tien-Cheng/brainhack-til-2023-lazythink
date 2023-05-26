@@ -161,3 +161,7 @@ cython_debug/
 
 # suspect images
 reid/suspects/
+
+# data for plotting distribution
+reid/train_labels/
+reid/val_labels/
