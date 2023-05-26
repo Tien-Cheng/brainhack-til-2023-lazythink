@@ -139,7 +139,7 @@ class BenchmarkModule(pl.LightningModule):
             top1 = (pred_labels[:, 0] == is_suspect_label).float().sum().item()
             return (batch_size_num, top1)
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         if outputs:
             total_num = 0
             total_top1 = 0.0
