@@ -36,12 +36,13 @@ def get_model(
 
 def get_dataloader(
     root_dir: str,
-    img_prefix: str,
-    label_prefix: str,
+    train_img_prefix: str,
+    train_label_prefix: str,
+    val_img_prefix: str,
+    val_label_prefix: str,
     transform_type: Literal["dino", "nnclr", "simclr", "smog"],
     batch_size: int = 64,
     num_workers: int = 2,
-    suspect: bool = False,
 ) -> torch.utils.data.DataLoader:
     if transform_type == "dino":
         transform = DINOTransform()
@@ -60,7 +61,7 @@ def get_dataloader(
     else:
         raise NotImplementedError()
 
-    train_yolo_dataset = YoloPlushieDataset(root_dir, img_prefix, label_prefix, suspect=suspect)
+    train_yolo_dataset = YoloPlushieDataset(root_dir, train_img_prefix, train_label_prefix)
 
     train_dataset = LightlyDataset.from_torch_dataset(
         train_yolo_dataset, transform=transform
@@ -75,7 +76,37 @@ def get_dataloader(
         num_workers=num_workers,
     )
 
-    return train_dataloader
+    val_yolo_dataset = YoloPlushieDataset(root_dir, val_img_prefix, val_label_prefix)
+
+    val_dataset = LightlyDataset.from_torch_dataset(
+        val_yolo_dataset, transform=transform
+    )
+
+    val_dataloader = torch.utils.data.DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        collate_fn=MultiViewCollate(),
+        shuffle=True,
+        drop_last=True,
+        num_workers=num_workers,
+    )
+
+    suspect_yolo_dataset = YoloPlushieDataset(root_dir, val_img_prefix, val_label_prefix, suspect=True)
+
+    suspect_dataset = LightlyDataset.from_torch_dataset(
+        suspect_yolo_dataset, transform=transform
+    )
+
+    suspect_dataloader = torch.utils.data.DataLoader(
+        suspect_dataset,
+        batch_size=batch_size,
+        collate_fn=MultiViewCollate(),
+        shuffle=True,
+        drop_last=True,
+        num_workers=num_workers,
+    )
+
+    return train_dataloader, val_dataloader, suspect_dataloader
 
 
 def get_trainer(
@@ -110,30 +141,13 @@ def get_trainer(
 @click.option("--devices", type=str, default="0")
 def main(architechture, backbone, batch_size, max_epochs, devices):
     model = get_model(architechture, backbone)
-    train_dataloader = get_dataloader(
+    train_dataloader, val_dataloader, suspect_dataloader = get_dataloader(
         root_dir="data",
         img_prefix="images/train",
         label_prefix="labels/yolo/train_labels",
         transform_type=architechture,
         batch_size=batch_size,
         num_workers=12,
-    )
-    val_dataloader = get_dataloader(
-        root_dir="data",
-        img_prefix="images/validate",
-        label_prefix="labels/yolo/val_labels",
-        transform_type=architechture,
-        batch_size=batch_size,
-        num_workers=12,
-    )
-    suspect_dataloader = get_dataloader(
-        root_dir="data",
-        img_prefix="images/train",
-        label_prefix="labels/yolo/train_labels",
-        transform_type=architechture,
-        batch_size=batch_size,
-        num_workers=12,
-        suspect=True,
     )
     trainer = get_trainer(
         max_epochs=max_epochs, devices=devices, architechture=architechture
