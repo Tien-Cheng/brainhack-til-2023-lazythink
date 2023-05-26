@@ -78,28 +78,68 @@ def get_dataloader(
     num_workers: int = 2,
 ) -> torch.utils.data.DataLoader:
     if transform_type == "dino":
-        transform = DINOTransform()
+        train_transform = DINOTransform()
+        val_transform = DINOTransform(
+            hf_prob=0,
+            cj_prob=0,
+            random_gray_scale=0,
+            gaussian_blur=(0, 0, 0),
+            solarization_prob=0,
+        )
     elif transform_type == "nnclr":
-        transform = SimCLRTransform(input_size=64, gaussian_blur=0.5)
+        train_transform = SimCLRTransform(input_size=64, gaussian_blur=0.5)
+        val_transform = SimCLRTransform(
+            input_size=64,
+            cj_prob=0,
+            random_gray_scale=0,
+            gaussian_blur=0,
+            hf_prob=0,
+        )
     elif transform_type == "simclr":
-        transform = SimCLRTransform(input_size=64, gaussian_blur=0.5)
+        train_transform = SimCLRTransform(input_size=64, gaussian_blur=0.5)
+        # Disable all augmentations for validation
+        val_transform = SimCLRTransform(
+            input_size=64,
+            cj_prob=0,
+            random_gray_scale=0,
+            gaussian_blur=0,
+            hf_prob=0,
+        )
     elif transform_type == "smog":
-        transform = SMoGTransform(
+        train_transform = SMoGTransform(
             crop_sizes=(64, 64),
             crop_counts=(1, 1),
             gaussian_blur_probs=(0.0, 0.0),
             crop_min_scales=(0.2, 0.2),
             crop_max_scales=(1.0, 1.0),
         )
+        val_transform = SMoGTransform(
+            gaussian_blur_probs=(0.0, 0.0),
+            hf_prob=0,
+            cj_prob=0,
+            random_gray_scale=0,
+        )
     else:
         raise NotImplementedError()
 
     train_yolo_dataset = YoloPlushieDataset(
-        root_dir, train_img_prefix, train_label_prefix
+        root_dir, train_img_prefix, train_label_prefix, suspect=False
+    )
+    val_yolo_dataset = YoloPlushieDataset(
+        root_dir, val_img_prefix, val_label_prefix, suspect=False
+    )
+    suspect_yolo_dataset = YoloPlushieDataset(
+        root_dir, val_img_prefix, val_label_prefix, suspect=True
     )
 
     train_dataset = LightlyDataset.from_torch_dataset(
-        train_yolo_dataset, transform=transform
+        train_yolo_dataset, transform=train_transform
+    )
+    val_dataset = LightlyDataset.from_torch_dataset(
+        val_yolo_dataset, transform=val_transform
+    )
+    suspect_dataset = LightlyDataset.from_torch_dataset(
+        suspect_yolo_dataset, transform=val_transform
     )
 
     train_dataloader = torch.utils.data.DataLoader(
@@ -111,14 +151,6 @@ def get_dataloader(
         num_workers=num_workers,
     )
 
-    val_yolo_dataset = YoloPlushieDataset(
-        root_dir, val_img_prefix, val_label_prefix
-    )
-
-    val_dataset = LightlyDataset.from_torch_dataset(
-        val_yolo_dataset, transform=transform
-    )
-
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset,
         batch_size=batch_size,
@@ -126,14 +158,6 @@ def get_dataloader(
         shuffle=False,
         drop_last=False,
         num_workers=num_workers,
-    )
-
-    suspect_yolo_dataset = YoloPlushieDataset(
-        root_dir, val_img_prefix, val_label_prefix, suspect=True
-    )
-
-    suspect_dataset = LightlyDataset.from_torch_dataset(
-        suspect_yolo_dataset, transform=transform
     )
 
     suspect_dataloader = torch.utils.data.DataLoader(
