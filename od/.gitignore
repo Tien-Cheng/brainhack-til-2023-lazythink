@@ -3,6 +3,7 @@ mmdetection
 
 # Ignore images
 data/images
+data/market1501
 
 # Ignore work_dirs
 work_dirs
