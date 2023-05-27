@@ -6,3 +6,6 @@ checkpoints
 
 # Ignore wandb
 wandb
+
+# Inference detection folder
+test_detected
