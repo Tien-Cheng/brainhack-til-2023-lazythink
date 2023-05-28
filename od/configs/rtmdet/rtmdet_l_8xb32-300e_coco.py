@@ -140,7 +140,7 @@ val_dataloader = dict(
 )
 test_dataloader = val_dataloader
 
-max_epochs = 100
+max_epochs = 10
 stage2_num_epochs = 20
 base_lr = 0.004
 interval = 10
