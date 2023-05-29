@@ -168,3 +168,6 @@ reid/val_labels/
 
 # filtering data for reid evaluation
 reid/filtered/
+
+# person reid
+reid/deep-person-reid/
