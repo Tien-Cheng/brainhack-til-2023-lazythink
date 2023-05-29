@@ -159,5 +159,13 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+train and val data
+reid/train_labels/
+reid/val_labels/
+
 # suspect images
 reid/suspects/
+reid/filtered/
+
+# person reid
+/reid/deep-person-reid/
