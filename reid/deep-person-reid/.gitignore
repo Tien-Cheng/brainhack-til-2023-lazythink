@@ -139,3 +139,6 @@ log/
 saved-models/
 model-zoo/
 debug*
+
+Test/
+test_processed/
